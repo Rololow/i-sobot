@@ -97,9 +97,9 @@
   column-gutter: 8pt,
   row-gutter: 6pt,
   ..(
-    [Allumer l'i-Sobot (réglé sur le *canal A*) et brancher l'ESP32, émetteur infrarouge tourné vers le robot.],
-    [Dans Dabble, toucher l'icône de connexion puis choisir *« i-Sobot »*. Si la première tentative échoue, réessayer.],
-    [Ouvrir le module *GamePad*. L'écran passe de « En attente » à la banque 1 (Système) : c'est prêt.],
+    [Allumer l'i-Sobot (réglé sur le *canal A*) et brancher l'ESP32, émetteur infrarouge tourné vers le robot. L'écran affiche *« Démarrage »* : attendre *« Prêt ! »*.],
+    [Dans Dabble, toucher l'icône de connexion puis choisir *« i-Sobot »*. L'écran affiche *« Connecté ! »* puis la banque 1. Si la première tentative échoue, réessayer.],
+    [Ouvrir le module *GamePad*. Si le téléphone se déconnecte, l'écran affiche *« Déconnecté »* : se reconnecter depuis Dabble.],
   )
     .enumerate()
     .map(((i, t)) => (

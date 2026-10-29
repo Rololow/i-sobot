@@ -160,6 +160,9 @@ async fn main(spawner: Spawner) -> ! {
     .with_scl(peripherals.GPIO22)
     .into_async();
     spawner.spawn(ecran_task(i2c).unwrap());
+    // L'initialisation du Bluetooth bloque l'exécuteur : on laisse d'abord l'écran
+    // s'initialiser et afficher « Démarrage ».
+    Timer::after_millis(150).await;
 
     let transport = BleConnector::new(peripherals.BT, Default::default()).unwrap();
     let ble_controller = ExternalController::<_, 20>::new(transport);
@@ -171,14 +174,16 @@ async fn main(spawner: Spawner) -> ! {
     let mut peripheral = stack.peripheral();
     let server = Server::new_with_config(GapConfig::default(NOM)).unwrap();
 
-    info!("Prêt : connecte-toi à « {NOM} » depuis Dabble, module GamePad");
+    info!("[ble] pile initialisée, annonce sous le nom « {NOM} »");
     join(ble_task(runner), async {
+        let mut deconnecte = false;
         loop {
-            match annoncer(&mut peripheral, &server).await {
+            match annoncer(&mut peripheral, &server, deconnecte).await {
                 Ok(conn) => {
                     session(&server, &conn).await;
                     // Ne pas laisser le robot marcher si le téléphone se déconnecte.
                     MARCHE.signal(None);
+                    deconnecte = true;
                 }
                 Err(e) => panic!("[ble] erreur d'annonce : {e:?}"),
             }
@@ -197,6 +202,7 @@ async fn ble_task<C: Controller, P: PacketPool>(mut runner: Runner<'_, C, P>) {
 }
 
 /// Annonce l'ESP32 et attend la connexion du téléphone.
+/// `deconnecte` : le téléphone vient de se déconnecter (affiché sur l'écran).
 #[allow(
     clippy::large_stack_frames,
     reason = "futur de la pile BLE, une seule instance à la fois"
@@ -204,6 +210,7 @@ async fn ble_task<C: Controller, P: PacketPool>(mut runner: Runner<'_, C, P>) {
 async fn annoncer<'v, 's, C: Controller>(
     peripheral: &mut Peripheral<'v, C, DefaultPacketPool>,
     server: &'s Server<'v>,
+    deconnecte: bool,
 ) -> Result<GattConnection<'v, 's, DefaultPacketPool>, BleHostError<C::Error>> {
     let mut adv_data = [0; 31];
     let adv_len = AdStructure::encode_slice(
@@ -227,8 +234,9 @@ async fn annoncer<'v, 's, C: Controller>(
             },
         )
         .await?;
+    // Seulement maintenant l'ESP32 est visible depuis le téléphone.
     info!("[ble] en attente du téléphone…");
-    ECRAN.signal(Vue::Attente);
+    ECRAN.signal(Vue::Attente { deconnecte });
     let conn = advertiser.accept().await?.with_attribute_server(server)?;
     info!("[ble] téléphone connecté");
     Ok(conn)
@@ -244,9 +252,8 @@ async fn session<P: PacketPool>(server: &Server<'_>, conn: &GattConnection<'_, '
     let mut parseur = Parseur::default();
     let mut controle = Controle::default();
     CLIGNOTER.signal((1, 0));
-    ECRAN.signal(Vue::Banque {
+    ECRAN.signal(Vue::Connecte {
         banque: controle.banque,
-        actif: None,
     });
 
     loop {
@@ -512,27 +519,48 @@ mod affichage {
         }
         info!("[écran] prêt");
 
-        let mut vue = Vue::Attente;
+        let mut vue = Vue::Demarrage;
         loop {
             ecran.clear_buffer();
             let _ = ecran::dessiner(&mut ecran, vue);
             if let Err(e) = ecran.flush().await {
                 warn!("[écran] erreur d'affichage : {e:?}");
             }
-            // La surbrillance de l'action envoyée s'efface au bout de 400 ms.
+            // Vues passagères : « Connecté ! » pendant 1 s, surbrillance d'une action pendant 400 ms.
             vue = match vue {
+                Vue::Connecte { banque } => {
+                    puis(
+                        Duration::from_secs(1),
+                        Vue::Banque {
+                            banque,
+                            actif: None,
+                        },
+                    )
+                    .await
+                }
                 Vue::Banque {
                     banque,
                     actif: Some(_),
-                } => match select(ECRAN.wait(), Timer::after_millis(400)).await {
-                    Either::First(nouvelle) => nouvelle,
-                    Either::Second(()) => Vue::Banque {
-                        banque,
-                        actif: None,
-                    },
-                },
+                } => {
+                    puis(
+                        Duration::from_millis(400),
+                        Vue::Banque {
+                            banque,
+                            actif: None,
+                        },
+                    )
+                    .await
+                }
                 _ => ECRAN.wait().await,
             };
+        }
+    }
+
+    /// Prochaine vue demandée, ou `ensuite` si rien n'arrive pendant `delai`.
+    async fn puis(delai: Duration, ensuite: Vue) -> Vue {
+        match select(ECRAN.wait(), Timer::after(delai)).await {
+            Either::First(nouvelle) => nouvelle,
+            Either::Second(()) => ensuite,
         }
     }
 }

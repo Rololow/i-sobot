@@ -1,4 +1,4 @@
-//! Contenu de l'écran OLED 128×64 : attente du téléphone, ou banque en cours.
+//! Contenu de l'écran OLED 128×64 : état de la connexion, ou banque en cours.
 //!
 //! Écran bicolore : les 16 premières lignes sont jaunes (en-tête), les 48 suivantes bleues
 //! (les 4 actions, 12 pixels chacune).
@@ -19,7 +19,12 @@ use crate::manette::{BANQUES, numero_categorie, position};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Vue {
-    Attente,
+    /// Le Bluetooth n'est pas encore prêt : inutile d'essayer de se connecter.
+    Demarrage,
+    /// Bluetooth visible, en attente du téléphone (`deconnecte` : il vient de se déconnecter).
+    Attente { deconnecte: bool },
+    /// Téléphone tout juste connecté ; la banque s'affiche ensuite.
+    Connecte { banque: usize },
     Banque {
         banque: usize,
         /// Bouton (0 à 3 : △ ○ ✕ □) dont l'action vient d'être envoyée, affiché en surbrillance.
@@ -34,21 +39,36 @@ const HAUT_LIGNE: i32 = 12;
 
 pub fn dessiner<D: DrawTarget<Color = BinaryColor>>(d: &mut D, vue: Vue) -> Result<(), D::Error> {
     match vue {
-        Vue::Attente => attente(d),
+        Vue::Demarrage => message(d, "Démarrage", &["Patiente avant de", "te connecter..."]),
+        Vue::Attente { deconnecte: false } => {
+            message(d, "Prêt !", &["Connecte-toi depuis", "Dabble"])
+        }
+        Vue::Attente { deconnecte: true } => {
+            message(d, "Déconnecté", &["Reconnecte-toi", "depuis Dabble"])
+        }
+        Vue::Connecte { .. } => message(d, "Connecté !", &[]),
         Vue::Banque { banque, actif } => banque_en_cours(d, banque, actif),
     }
 }
 
-fn attente<D: DrawTarget<Color = BinaryColor>>(d: &mut D) -> Result<(), D::Error> {
+/// « i-Sobot » dans la zone jaune, l'état en gros dessous, puis jusqu'à deux lignes d'explication.
+fn message<D: DrawTarget<Color = BinaryColor>>(
+    d: &mut D,
+    etat: &str,
+    lignes: &[&str],
+) -> Result<(), D::Error> {
     let centre = TextStyleBuilder::new()
         .alignment(Alignment::Center)
         .baseline(Baseline::Top)
         .build();
-    let titre = MonoTextStyle::new(&FONT_9X15_BOLD, BinaryColor::On);
+    let gras = MonoTextStyle::new(&FONT_9X15_BOLD, BinaryColor::On);
     let petit = MonoTextStyle::new(&FONT_6X10, BinaryColor::On);
-    Text::with_text_style("i-Sobot", Point::new(LARGEUR / 2, 1), titre, centre).draw(d)?;
-    Text::with_text_style("En attente du", Point::new(LARGEUR / 2, 28), petit, centre).draw(d)?;
-    Text::with_text_style("téléphone...", Point::new(LARGEUR / 2, 42), petit, centre).draw(d)?;
+    Text::with_text_style("i-Sobot", Point::new(LARGEUR / 2, 1), gras, centre).draw(d)?;
+    Text::with_text_style(etat, Point::new(LARGEUR / 2, 21), gras, centre).draw(d)?;
+    for (i, ligne) in lignes.iter().enumerate() {
+        let y = 40 + 11 * i as i32;
+        Text::with_text_style(ligne, Point::new(LARGEUR / 2, y), petit, centre).draw(d)?;
+    }
     Ok(())
 }
 
