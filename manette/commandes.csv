@@ -1,0 +1,140 @@
+commande,libelle,maintenir,ecran
+forward,Avancer,oui,Avancer
+backward,Reculer,oui,Reculer
+sideright,Pas chassé à droite,oui,Pas chassé à droite
+sideleft,Pas chassé à gauche,oui,Pas chassé à gauche
+fleft,Avancer en diagonale gauche,oui,Diagonale av. G
+fright,Avancer en diagonale droite,oui,Diagonale av. D
+bleft,Reculer en diagonale gauche,oui,Diagonale arr. G
+bright,Reculer en diagonale droite,oui,Diagonale arr. D
+fclockwise,Tourner à droite,oui,Tourner à droite
+fcounter,Tourner à gauche,oui,Tourner à gauche
+bclockwise,Tourner à droite en reculant,oui,Tourner D en arr.
+bcounter,Tourner à gauche en reculant,oui,Tourner G en arr.
+headleft,Tête à gauche,oui,Tête à gauche
+headright,Tête à droite,oui,Tête à droite
+leanforward,Se pencher en avant,oui,Se pencher en avant
+leanback,Se pencher en arrière,oui,Pencher en arrière
+lpunch,Coup de poing gauche,non,Poing gauche
+r12,Une-deux droit,non,Une-deux droit
+lchop,Manchette gauche,non,Manchette gauche
+sidechopl,Manchette latérale gauche,non,Manchette lat. G
+combopunch,Combo de poings,non,Combo de poings
+rpunch,Coup de poing droit,non,Poing droit
+rchop,Manchette droite,non,Manchette droite
+l12,Une-deux gauche,non,Une-deux gauche
+sidechopr,Manchette latérale droite,non,Manchette lat. D
+lbackhand,Revers gauche,non,Revers gauche
+doublechop,Double manchette,non,Double manchette
+doublebackhand,Double revers,non,Double revers
+slapping,Gifles,non,Gifles
+rbackhand,Revers droit,non,Revers droit
+upperchop,Manchette montante,non,Manchette montante
+roundhousel,Coup de pied circulaire gauche,non,Pied circulaire G
+roundhouser,Coup de pied circulaire droit,non,Pied circulaire D
+forwardkickl,Coup de pied avant gauche,non,Pied avant gauche
+forwardkickr,Coup de pied avant droit,non,Pied avant droit
+sidekickl,Coup de pied latéral gauche,non,Pied latéral gauche
+roundhouselr,Circulaire gauche + droit,non,Circulaire G + D
+forwardkicklr,Coup de pied avant gauche + droit,non,Pied avant G + D
+combokick,Combo de pieds,non,Combo de pieds
+sidekickr,Coup de pied latéral droit,non,Pied latéral droit
+backkickl,Coup de pied arrière gauche,non,Pied arrière gauche
+backkickr,Coup de pied arrière droit,non,Pied arrière droit
+highkickl,Coup de pied haut gauche,non,Pied haut gauche
+highkickr,Coup de pied haut droit,non,Pied haut droit
+splits1,Grand écart 1,non,Grand écart 1
+guardl,Garde gauche,non,Garde gauche
+guardr,Garde droite,non,Garde droite
+doubleguard1,Double garde 1,non,Double garde 1
+doubleguard2,Double garde 2,non,Double garde 2
+dodgel,Esquive à gauche,non,Esquive à gauche
+dodger,Esquive à droite,non,Esquive à droite
+duck,Se baisser,non,Se baisser
+swayback,Esquive en arrière,non,Esquive en arrière
+upblock,Parade haute,non,Parade haute
+splits2,Grand écart 2,non,Grand écart 2
+comboblock,Combo de parades,non,Combo de parades
+zero,« Zero » (effet inconnu),non,Zero (inconnu)
+homeposition,Position de repos,non,Position de repos
+soundoff,Couper le son,non,Couper le son
+affirm,Oui,non,Oui
+disagree,Non,non,Non
+goodmorning,Bonjour,non,Bonjour
+greet1,Salut 1,non,Salut 1
+greet2,Salut 2,non,Salut 2
+greet3,Salut 3,non,Salut 3
+greet4,Salut 4,non,Salut 4
+bye1,Au revoir 1,non,Au revoir 1
+bye2,Au revoir 2,non,Au revoir 2
+bye3,Au revoir 3,non,Au revoir 3
+bye4,Au revoir 4,non,Au revoir 4
+bye5,Au revoir 5,non,Au revoir 5
+respect,Révérence,non,Révérence
+thanks1,Merci 1,non,Merci 1
+thanks2,Merci 2,non,Merci 2
+love1,Amour 1,non,Amour 1
+love2,Amour 2,non,Amour 2
+love3,Amour 3,non,Amour 3
+standupfront,Se relever (sur le ventre),non,Relever (ventre)
+standupback,Se relever (sur le dos),non,Relever (dos)
+excited1,Excité 1,non,Excité 1
+excited2,Excité 2,non,Excité 2
+excited3,Excité 3,non,Excité 3
+excited4,Excité 4,non,Excité 4
+party,Fête,non,Fête
+amazed,Émerveillé,non,Émerveillé
+regret1,Regret 1,non,Regret 1
+regret2,Regret 2,non,Regret 2
+regret3,Regret 3,non,Regret 3
+worry,Inquiet,non,Inquiet
+pain1,Douleur 1,non,Douleur 1
+pain2,Douleur 2,non,Douleur 2
+beg1,Supplier 1,non,Supplier 1
+beg2,Supplier 2,non,Supplier 2
+merry,Joyeux,non,Joyeux
+hilarious,Fou rire,non,Fou rire
+hidenseek,Cache-cache,non,Cache-cache
+youlike,Tu m'aimes ?,non,Tu m'aimes ?
+mystery5,Mystère 5,non,Mystère 5
+tipsy,Éméché,non,Éméché
+tickleme,Chatouilles,non,Chatouilles
+tiredfeet,Pieds fatigués,non,Pieds fatigués
+needabreak,Besoin d'une pause,non,Besoin d'une pause
+wave1,Coucou 1,non,Coucou 1
+wave2,Coucou 2,non,Coucou 2
+applause,Applaudir,non,Applaudir
+mystery6,Mystère 6,non,Mystère 6
+toosexy,Trop beau,non,Trop beau
+clink,Trinquer,non,Trinquer
+relax,Se détendre,non,Se détendre
+soccer1,Football 1,non,Football 1
+soccer2,Football 2,non,Football 2
+soccer3,Football 3,non,Football 3
+lift,Soulever,non,Soulever
+countonme,Compte sur moi,non,Compte sur moi
+articulation,Articulations,non,Articulations
+showoff1,Frimer 1,non,Frimer 1
+showoff2,Frimer 2,non,Frimer 2
+showoff3,Frimer 3,non,Frimer 3
+showoff4,Frimer 4,non,Frimer 4
+cominthrough,Laissez passer,non,Laissez passer
+catch,Attraper,non,Attraper
+pose1,Pose 1,non,Pose 1
+pose2,Pose 2,non,Pose 2
+pose3,Pose 3,non,Pose 3
+mystery1,Mystère 1,non,Mystère 1
+mystery2,Mystère 2,non,Mystère 2
+mystery3,Mystère 3,non,Mystère 3
+mystery4,Mystère 4,non,Mystère 4
+forwardsomersault,Roulade avant,non,Roulade avant
+headstandexercises,Poirier,non,Poirier
+exercises,Exercices,non,Exercices
+airdrum,Batterie imaginaire,non,Batterie imaginaire
+airguitar,Guitare imaginaire,non,Guitare imaginaire
+randomperformance1,Spectacle surprise 1,non,Spectacle surpr. 1
+randomanimal,Animal surprise,non,Animal surprise
+tropicaldance,Danse tropicale,non,Danse tropicale
+giantrobot,Robot géant,non,Robot géant
+western,Western,non,Western
+randomperformance2,Spectacle surprise 2,non,Spectacle surpr. 2
