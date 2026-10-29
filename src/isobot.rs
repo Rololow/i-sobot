@@ -64,6 +64,12 @@ pub fn trame(code: u32) -> [PulseCode; FRAME_LEN] {
     pulses
 }
 
+/// Mot de 22 bits (canal A) d'une commande à un seul octet, avec le paramètre 0x03
+/// utilisé par imchipwood (les codes de Moody utilisent 0x00, le robot accepte les deux).
+pub const fn commande(octet: u8) -> u32 {
+    sur_canal((1 << 19) | (octet as u32) << 8 | 0x03, Canal::A)
+}
+
 /// Codes des commandes (canal A), noms d'origine de Miles Moody.
 pub mod cmd {
     pub const FORWARD: u32 = 898819;
@@ -205,4 +211,81 @@ pub mod cmd {
     pub const GIANTROBOT: u32 = 956416;
     pub const WESTERN: u32 = 1022208;
     pub const RANDOMPERFORMANCE2: u32 = 629504;
+
+    // Commandes absentes de la table de Moody (imchipwood, d'après le rapport de M. Sunardi)
+    pub const STOP: u32 = super::commande(0x00);
+    pub const BANZAI3: u32 = super::commande(0x8F);
+    pub const BANZAI: u32 = super::commande(0x7F);
+    pub const CHEER: u32 = super::commande(0x90);
+    pub const AAAA: u32 = super::commande(0x9A);
+    pub const SWANLAKE: u32 = super::commande(0xB1);
+    pub const DISCO: u32 = super::commande(0xB2);
+    pub const MOONWALK: u32 = super::commande(0xB3);
+    pub const GORILLA: u32 = super::commande(0x96);
+    pub const DOG: u32 = super::commande(0x92);
+    pub const CAR: u32 = super::commande(0x93);
+    pub const ROOSTER: u32 = super::commande(0x95);
+    pub const LOOKOUT: u32 = super::commande(0xA1);
+    pub const STORY1: u32 = super::commande(0xA2);
+    pub const STORY2: u32 = super::commande(0xA3);
+    pub const GOODMORNING2: u32 = super::commande(0xA4);
+    pub const LETSPLAY: u32 = super::commande(0xA5);
+    pub const OOPS: u32 = super::commande(0xA6);
+    pub const GOOUT: u32 = super::commande(0xA7);
+    pub const ROUND: u32 = super::commande(0xA8);
+    pub const INTRODUCTION: u32 = super::commande(0xA9);
+    pub const ATYOURSERVICE: u32 = super::commande(0xAA);
+    pub const SMELLS: u32 = super::commande(0xAB);
+    pub const CLOSE: u32 = super::commande(0xAC);
+    pub const PIECEOFME: u32 = super::commande(0xAD);
+    pub const RUNFORYOURLIFE: u32 = super::commande(0xAE);
+    pub const TOOYOUNG: u32 = super::commande(0xAF);
+    pub const ALLYOURBASE: u32 = super::commande(0x41);
+    pub const BEARHUG: u32 = super::commande(0x54);
+    pub const TURNON: u32 = super::commande(0x01);
+    pub const ACTIVATED: u32 = super::commande(0x02);
+    pub const READY: u32 = super::commande(0x03);
+    pub const BEEP: u32 = super::commande(0x6A);
+    pub const HUMMING: u32 = super::commande(0x0F);
+    pub const COUGH: u32 = super::commande(0x10);
+    pub const TIRED: u32 = super::commande(0x11);
+    pub const SLEEPY: u32 = super::commande(0x12);
+    pub const IDLE: u32 = super::commande(0x0B);
+    pub const FART: u32 = super::commande(0x40);
+    pub const THANKYOUSIR: u32 = super::commande(0xEA);
+    pub const ILOVEYOU: u32 = super::commande(0xEB);
+    pub const SHOOTRIGHT: u32 = super::commande(0x64);
+    pub const SHOOTRIGHT2: u32 = super::commande(0x68);
+    pub const SHOOT2: u32 = super::commande(0x69);
+    pub const THREEBEEPS: u32 = super::commande(0xEC);
+    pub const RCCONFIRM: u32 = super::commande(0x04);
+    pub const RCPROMPT: u32 = super::commande(0x05);
+    pub const MODEPROMPT: u32 = super::commande(0x06);
+    pub const REPEAT1: u32 = super::commande(0xB4);
+    pub const REPEAT2: u32 = super::commande(0xB5);
+    pub const REPEAT3: u32 = super::commande(0xB6);
+    pub const THREEBEEPSSLIDE: u32 = super::commande(0xEE);
+    pub const WAHOO: u32 = super::commande(0x65);
+    pub const HOOAH: u32 = super::commande(0x66);
+    pub const KAPWING: u32 = super::commande(0x67);
+    pub const HEADSMASH: u32 = super::commande(0xC5);
+    pub const HEADHIT: u32 = super::commande(0xC6);
+    pub const PLAYDEAD: u32 = super::commande(0xED);
+    pub const BENDBACK: u32 = super::commande(0xD8);
+    pub const BENDFORWARD: u32 = super::commande(0xDD);
+    pub const HEADLEFT60: u32 = super::commande(0xDE);
+    pub const HEADLEFT45: u32 = super::commande(0xDF);
+    pub const HEADLEFT30: u32 = super::commande(0xE0);
+    pub const HEADRIGHT30: u32 = super::commande(0xE1);
+    pub const HEADRIGHT45: u32 = super::commande(0xE2);
+    pub const HEADRIGHT60: u32 = super::commande(0xE3);
+    pub const HEADSCAN: u32 = super::commande(0xE7);
+    pub const ARMTEST: u32 = super::commande(0xE8);
+    pub const LEGTEST: u32 = super::commande(0xE9);
+    pub const ACT43A: u32 = super::commande(0x50);
+    pub const ACT12B: u32 = super::commande(0x55);
+    pub const MODERC: u32 = super::commande(0x07);
+    pub const MODEPROG: u32 = super::commande(0x08);
+    pub const MODESON: u32 = super::commande(0x09);
+    pub const MODEVOCAL: u32 = super::commande(0x0A);
 }

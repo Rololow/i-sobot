@@ -8,6 +8,8 @@ pub struct Action {
     pub code: u32,
     /// Répétée tant que le bouton est appuyé (pas chassés, tête…), sinon envoyée une fois.
     pub maintenir: bool,
+    /// Libellé court (19 caractères au plus) affiché sur l'écran OLED.
+    pub ecran: &'static str,
 }
 
 /// Actions des boutons △ ○ ✕ □.
@@ -39,14 +41,24 @@ pub fn categorie_suivante(banque: usize) -> usize {
     if i < BANQUES.len() { i } else { 0 }
 }
 
-/// Banque suivante dans la même catégorie (revient à la première après la dernière).
-pub fn banque_suivante(banque: usize) -> usize {
-    let suivante = banque + 1;
-    if suivante < BANQUES.len() && meme_categorie(suivante, banque) {
-        suivante
+/// Première banque de la catégorie précédente (revient à la dernière catégorie avant la première).
+pub fn categorie_precedente(banque: usize) -> usize {
+    let debut = debut_categorie(banque);
+    debut_categorie(if debut == 0 {
+        BANQUES.len() - 1
     } else {
-        debut_categorie(banque)
-    }
+        debut - 1
+    })
+}
+
+/// Banque suivante, en passant à la catégorie suivante après la dernière banque d'une catégorie.
+pub fn banque_suivante(banque: usize) -> usize {
+    (banque + 1) % BANQUES.len()
+}
+
+/// Banque précédente, toutes catégories à la suite.
+pub fn banque_precedente(banque: usize) -> usize {
+    (banque + BANQUES.len() - 1) % BANQUES.len()
 }
 
 /// Numéro de la catégorie, à partir de 1.

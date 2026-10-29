@@ -57,7 +57,7 @@ splits2,Grand écart 2,non,Grand écart 2
 comboblock,Combo de parades,non,Combo de parades
 zero,« Zero » (effet inconnu),non,Zero (inconnu)
 homeposition,Position de repos,non,Position de repos
-soundoff,Couper le son,non,Couper le son
+soundoff,Voix remplacée par des bips (éteindre le robot pour annuler),non,Bips seuls (!)
 affirm,Oui,non,Oui
 disagree,Non,non,Non
 goodmorning,Bonjour,non,Bonjour
@@ -138,3 +138,78 @@ tropicaldance,Danse tropicale,non,Danse tropicale
 giantrobot,Robot géant,non,Robot géant
 western,Western,non,Western
 randomperformance2,Spectacle surprise 2,non,Spectacle surpr. 2
+stop,Stop (interrompre l'action),non,Stop
+banzai3,Banzaï ×3,non,Banzaï ×3
+banzai,Banzaï « Takara Tomy »,non,Banzaï Takara Tomy
+cheer,Hourra,non,Hourra
+aaaa,Action spéciale AAAA,non,Spéciale AAAA
+swanlake,Lac des cygnes,non,Lac des cygnes
+disco,Disco,non,Disco
+moonwalk,Moonwalk,non,Moonwalk
+gorilla,Gorille,non,Gorille
+dog,Chien,non,Chien
+car,Voiture,non,Voiture
+rooster,Coq,non,Coq
+lookout,Guetteur,non,Guetteur
+story1,Histoire : le chevalier et la princesse,non,Histoire chevalier
+story2,Histoire : une nouvelle journée,non,Histoire journée
+goodmorning2,Bonjour (version longue),non,Bonjour (long)
+letsplay,On fait un truc marrant ?,non,On s'amuse ?
+oops,Petit accident,non,Petit accident
+goout,Sortir danser,non,Sortir danser
+round,Une tournée pour tout le monde,non,Une tournée !
+introduction,Se présenter,non,Se présenter
+atyourservice,À votre service,non,À votre service
+smells,Ça sent mauvais,non,Ça sent mauvais
+close,C'était moins une,non,C'était moins une
+pieceofme,Tu me cherches ?,non,Tu me cherches ?
+runforyourlife,Sauve qui peut !,non,Sauve qui peut !
+tooyoung,Trop jeune pour mourir,non,Trop jeune !
+allyourbase,« All your base are belong to us »,non,All your base
+bearhug,Câlin d'ours (en marchant),non,Câlin d'ours
+turnon,Démarrage,non,Démarrage
+activated,Activé,non,Activé
+ready,Prêt !,non,Prêt !
+beep,Bip,non,Bip
+humming,Fredonner,non,Fredonner
+cough,Tousser,non,Tousser
+tired,Fatigué,non,Fatigué
+sleepy,Endormi,non,Endormi
+idle,S'ennuyer,non,S'ennuyer
+fart,Prout,non,Prout
+thankyousir,Merci monsieur,non,Merci monsieur
+iloveyou,Je t'aime (court),non,Je t'aime
+shootright,Tir à droite,non,Tir à droite
+shootright2,Tir à droite 2,non,Tir à droite 2
+shoot2,Tir 2,non,Tir 2
+threebeeps,3 bips,non,3 bips
+rcconfirm,Confirmation,non,Confirmation
+rcprompt,Appel de la télécommande,non,Appel télécommande
+modeprompt,Choix du mode,non,Choix du mode
+repeat1,Répète-moi 1,non,Répète-moi 1
+repeat2,Répète-moi 2,non,Répète-moi 2
+repeat3,Répète-moi 3,non,Répète-moi 3
+threebeepsslide,3 bips + glissade,non,3 bips + glissade
+wahoo,Montrer à gauche « wahoo »,non,Montrer « wahoo »
+hooah,Pose « hoo-ah »,non,Pose « hoo-ah »
+kapwing,Montrer à gauche « kapwing »,non,Montrer « kapwing »
+headsmash,Coup de tête,non,Coup de tête
+headhit,Tête frappée,non,Tête frappée
+playdead,Faire le mort,non,Faire le mort
+bendback,Se cambrer,non,Se cambrer
+bendforward,Se courber,non,Se courber
+headleft60,Tête à gauche 60°,non,Tête à gauche 60°
+headleft45,Tête à gauche 45°,non,Tête à gauche 45°
+headleft30,Tête à gauche 30°,non,Tête à gauche 30°
+headright30,Tête à droite 30°,non,Tête à droite 30°
+headright45,Tête à droite 45°,non,Tête à droite 45°
+headright60,Tête à droite 60°,non,Tête à droite 60°
+headscan,Balayage de la tête,non,Balayage de la tête
+armtest,Test des bras,non,Test des bras
+legtest,Test chute et jambes,non,Test chute+jambes
+act43a,Action 43A (inconnue),non,Action 43A ?
+act12b,Action 12B (inconnue),non,Action 12B ?
+moderc,Mode télécommande (normal),non,Mode télécommande
+modeprog,Mode programme,non,Mode programme
+modeson,Mode réaction au son,non,Mode son
+modevocal,Mode commande vocale,non,Mode vocal

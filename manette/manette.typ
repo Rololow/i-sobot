@@ -63,11 +63,10 @@
 }
 
 // Clignotements de la LED : longs pour la catégorie, courts pour la banque.
-#let clignotements(n, largeur) = box(baseline: 15%, stack(
-  dir: ltr,
-  spacing: 2pt,
-  ..range(n).map(_ => box(width: largeur, height: 4pt, radius: 2pt, fill: bleu-led)),
-))
+// Pastilles en ligne : elles passent à la ligne si la colonne est trop étroite.
+#let clignotements(n, largeur) = (
+  range(n).map(_ => box(width: largeur, height: 4pt, radius: 2pt, fill: bleu-led)).join(h(2pt))
+)
 #let led-longs(n, largeur: 10pt) = clignotements(n, largeur)
 #let led-courts(n) = clignotements(n, 4pt)
 
@@ -100,7 +99,7 @@
   ..(
     [Allumer l'i-Sobot (réglé sur le *canal A*) et brancher l'ESP32, émetteur infrarouge tourné vers le robot.],
     [Dans Dabble, toucher l'icône de connexion puis choisir *« i-Sobot »*. Si la première tentative échoue, réessayer.],
-    [Ouvrir le module *GamePad*. La LED bleue de l'ESP32 fait un clignotement long : c'est prêt, catégorie 1 (Système).],
+    [Ouvrir le module *GamePad*. L'écran passe de « En attente » à la banque 1 (Système) : c'est prêt.],
   )
     .enumerate()
     .map(((i, t)) => (
@@ -148,8 +147,10 @@
     #stack(
       spacing: 9pt,
       ligne[#symbole("triangle") #symbole("rond") #symbole("croix") #symbole("carre")][Action de la banque en cours (tableau ci-dessous).],
-      ligne[Start][Catégorie suivante. La LED fait un clignotement *long* par numéro de catégorie : #led-longs(3) = Poings.],
-      ligne[Select][Banque suivante dans la catégorie, puis retour à la première. La LED fait un clignotement *court* par numéro de banque : #led-courts(2) = banque 2.],
+      ligne[Select][Banque suivante ; après la dernière banque d'une catégorie, passe à la catégorie suivante. *Appui long* (½ s) : banque précédente.],
+      ligne[Start][Saute directement à la catégorie suivante. *Appui long* (½ s) : catégorie précédente.],
+      ligne[Écran][Ligne 1 : catégorie et banque, par exemple #box[*3 Poings 2/4*]. Lignes 2 à 5 : actions de #symbole("triangle") #symbole("rond") #symbole("croix") #symbole("carre").],
+      ligne[LED bleue][Sans écran : un clignotement *long* par numéro de catégorie quand elle change (#led-longs(3) = Poings), puis un *court* par numéro de banque (#led-courts(2) = banque 2).],
       ligne[Joystick][Mode *Joystick* de Dabble : marche dans 8 directions, pas chassés compris.],
       ligne[#badge-maintenir][Action répétée tant que le bouton reste appuyé.],
     )

@@ -1,5 +1,5 @@
 categorie,triangle,rond,croix,carre
-Système,homeposition,standupfront,standupback,soundoff
+Système,homeposition,standupfront,standupback,stop
 Mouvements,sideleft,sideright,bcounter,bclockwise
 Mouvements,headleft,headright,leanforward,leanback
 Poings,lpunch,rpunch,l12,r12
@@ -32,5 +32,24 @@ Spectacle,pose1,pose2,pose3,cominthrough
 Spectacle,forwardsomersault,headstandexercises,exercises,airdrum
 Spectacle,airguitar,tropicaldance,giantrobot,western
 Spectacle,randomperformance1,randomperformance2,randomanimal,
+Spéciales,banzai3,banzai,cheer,aaaa
+Spéciales,swanlake,disco,moonwalk,gorilla
+Spéciales,dog,car,rooster,lookout
+Spéciales,story1,story2,goodmorning2,letsplay
+Spéciales,oops,goout,round,introduction
+Spéciales,atyourservice,smells,close,pieceofme
+Spéciales,runforyourlife,tooyoung,allyourbase,bearhug
+Voix & sons,turnon,activated,ready,beep
+Voix & sons,humming,cough,tired,sleepy
+Voix & sons,idle,fart,thankyousir,iloveyou
+Voix & sons,shootright,shootright2,shoot2,threebeeps
+Voix & sons,rcconfirm,rcprompt,modeprompt,repeat1
+Voix & sons,repeat2,repeat3,threebeepsslide,soundoff
+Gestes +,wahoo,hooah,kapwing,headsmash
+Gestes +,headhit,playdead,bendback,bendforward
+Gestes +,headleft60,headleft45,headleft30,headright30
+Gestes +,headright45,headright60,headscan,armtest
+Gestes +,legtest,act43a,act12b,
+Modes,moderc,modeprog,modeson,modevocal
 Mystères,mystery1,mystery2,mystery3,mystery4
 Mystères,mystery5,mystery6,zero,

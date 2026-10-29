@@ -15,7 +15,18 @@ const GAMEPAD_ANALOG: u8 = 0x02;
 const GAMEPAD_ACCL: u8 = 0x03;
 
 /// Réponse à la demande d'identification de l'app : carte « ESP32 », bibliothèque 1.5.1.
-pub const BOARD_ID_ESP32: [u8; 10] = [START, MODULE_DABBLE, BOARD_ID_REQUEST, 1, 4, 0x06, 1, 5, 1, END];
+pub const BOARD_ID_ESP32: [u8; 10] = [
+    START,
+    MODULE_DABBLE,
+    BOARD_ID_REQUEST,
+    1,
+    4,
+    0x06,
+    1,
+    5,
+    1,
+    END,
+];
 
 /// Bits de l'octet « boutons » de la manette.
 pub mod bouton {
@@ -66,7 +77,10 @@ pub struct Parseur {
 
 impl Default for Parseur {
     fn default() -> Self {
-        Self { buf: [0; 64], len: 0 }
+        Self {
+            buf: [0; 64],
+            len: 0,
+        }
     }
 }
 

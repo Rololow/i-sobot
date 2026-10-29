@@ -13,8 +13,11 @@
 //! - Croix directionnelle : marcher (↑ ↓, diagonales) et tourner (← →), tant qu'elle est appuyée.
 //! - Joystick : marcher dans 8 directions, pas chassés compris.
 //! - △ ○ ✕ □ : actions de la banque courante (voir manette/banques.csv).
-//! - Start : catégorie suivante (la LED bleue fait autant de clignotements longs que son numéro).
-//! - Select : banque suivante dans la catégorie (autant de clignotements courts que sa position).
+//! - Select : banque suivante, toutes catégories à la suite ; Start : catégorie suivante.
+//!   Appui long (au moins `APPUI_LONG`) : banque ou catégorie précédente.
+//!   L'écran OLED affiche la banque et ses 4 actions. Sans écran, la LED bleue fait un
+//!   clignotement long par numéro de catégorie (quand elle change), puis un court par
+//!   numéro de banque dans la catégorie.
 
 use bt_hci::controller::ExternalController;
 use embassy_executor::Spawner;
@@ -28,16 +31,20 @@ use esp_backtrace as _;
 use esp_hal::Async;
 use esp_hal::clock::CpuClock;
 use esp_hal::gpio::{Level, Output, OutputConfig};
+use esp_hal::i2c::master::{Config as I2cConfig, I2c};
 use esp_hal::rmt::{self, Rmt, Tx, TxChannelConfig, TxChannelCreator};
 use esp_hal::time::Rate;
 use esp_hal::timer::timg::TimerGroup;
 use esp_radio::ble::controller::BleConnector;
 use isobot::dabble::{self, Direction, Manette, Message, Parseur, bouton, fleche};
+use isobot::ecran::{self, Vue};
 use isobot::isobot::{self as ir, Canal, cmd};
 use isobot::manette::{
-    BANQUES, banque_suivante, categorie_suivante, numero_categorie, position,
+    BANQUES, banque_precedente, banque_suivante, categorie_precedente, categorie_suivante,
+    numero_categorie, position,
 };
 use log::{debug, info, warn};
+use ssd1306::{I2CDisplayInterface, Ssd1306Async, prelude::*};
 use trouble_host::prelude::*;
 
 extern crate alloc;
@@ -48,6 +55,8 @@ const NOM: &str = "i-Sobot";
 const CANAL: Canal = Canal::A;
 /// Écart entre deux trames IR ; la marche est entretenue en répétant la trame à ce rythme.
 const ECART_TRAMES: Duration = Duration::from_millis(200);
+/// Durée à partir de laquelle Select ou Start reculent au lieu d'avancer.
+const APPUI_LONG: Duration = Duration::from_millis(500);
 
 /// Porteuse 38 kHz, rapport cyclique 1/3, comptée sur l'horloge source du RMT (80 MHz).
 const RMT_SOURCE_HZ: u32 = 80_000_000;
@@ -61,8 +70,13 @@ static ACTIONS: channel::Channel<CriticalSectionRawMutex, u32, 4> = channel::Cha
 static MARCHE: Signal<CriticalSectionRawMutex, Option<u32>> = Signal::new();
 /// Clignotements de la LED à faire : (longs, courts).
 static CLIGNOTER: Signal<CriticalSectionRawMutex, (u8, u8)> = Signal::new();
+/// Contenu à afficher sur l'écran OLED.
+static ECRAN: Signal<CriticalSectionRawMutex, Vue> = Signal::new();
 
-#[allow(clippy::large_stack_frames, reason = "table d'attributs construite une seule fois dans main")]
+#[allow(
+    clippy::large_stack_frames,
+    reason = "table d'attributs construite une seule fois dans main"
+)]
 mod gatt {
     use trouble_host::prelude::*;
 
@@ -136,6 +150,17 @@ async fn main(spawner: Spawner) -> ! {
     let led = Output::new(peripherals.GPIO2, Level::Low, OutputConfig::default());
     spawner.spawn(led_task(led).unwrap());
 
+    // Écran OLED SSD1306 128×64 en I2C : SDA = GPIO21, SCL = GPIO22
+    let i2c = I2c::new(
+        peripherals.I2C0,
+        I2cConfig::default().with_frequency(Rate::from_khz(400)),
+    )
+    .unwrap()
+    .with_sda(peripherals.GPIO21)
+    .with_scl(peripherals.GPIO22)
+    .into_async();
+    spawner.spawn(ecran_task(i2c).unwrap());
+
     let transport = BleConnector::new(peripherals.BT, Default::default()).unwrap();
     let ble_controller = ExternalController::<_, 20>::new(transport);
     let mut resources: HostResources<_, DefaultPacketPool, 1, 2> = HostResources::new();
@@ -172,7 +197,10 @@ async fn ble_task<C: Controller, P: PacketPool>(mut runner: Runner<'_, C, P>) {
 }
 
 /// Annonce l'ESP32 et attend la connexion du téléphone.
-#[allow(clippy::large_stack_frames, reason = "futur de la pile BLE, une seule instance à la fois")]
+#[allow(
+    clippy::large_stack_frames,
+    reason = "futur de la pile BLE, une seule instance à la fois"
+)]
 async fn annoncer<'v, 's, C: Controller>(
     peripheral: &mut Peripheral<'v, C, DefaultPacketPool>,
     server: &'s Server<'v>,
@@ -200,18 +228,26 @@ async fn annoncer<'v, 's, C: Controller>(
         )
         .await?;
     info!("[ble] en attente du téléphone…");
+    ECRAN.signal(Vue::Attente);
     let conn = advertiser.accept().await?.with_attribute_server(server)?;
     info!("[ble] téléphone connecté");
     Ok(conn)
 }
 
 /// Traite les trames Dabble jusqu'à la déconnexion.
-#[allow(clippy::large_stack_frames, reason = "futur de la pile BLE, une seule instance à la fois")]
+#[allow(
+    clippy::large_stack_frames,
+    reason = "futur de la pile BLE, une seule instance à la fois"
+)]
 async fn session<P: PacketPool>(server: &Server<'_>, conn: &GattConnection<'_, '_, P>) {
     let rx = server.uart.rx.handle;
     let mut parseur = Parseur::default();
     let mut controle = Controle::default();
     CLIGNOTER.signal((1, 0));
+    ECRAN.signal(Vue::Banque {
+        banque: controle.banque,
+        actif: None,
+    });
 
     loop {
         match conn.next().await {
@@ -249,7 +285,11 @@ async fn session<P: PacketPool>(server: &Server<'_>, conn: &GattConnection<'_, '
                     Err(e) => warn!("[ble] réponse impossible : {e:?}"),
                 }
                 if identification
-                    && let Err(e) = server.uart.tx.notify_raw(conn, &dabble::BOARD_ID_ESP32, false).await
+                    && let Err(e) = server
+                        .uart
+                        .tx
+                        .notify_raw(conn, &dabble::BOARD_ID_ESP32, false)
+                        .await
                 {
                     warn!("[ble] identification non envoyée : {e:?}");
                 }
@@ -266,6 +306,10 @@ struct Controle {
     banque: usize,
     /// Code répété en ce moment (marche ou action maintenue).
     pas: Option<u32>,
+    /// Instants d'appui sur Select et Start : la navigation se fait au relâchement,
+    /// vers l'avant sur un appui court, vers l'arrière sur un appui long.
+    appui_select: Option<Instant>,
+    appui_start: Option<Instant>,
 }
 
 impl Controle {
@@ -276,21 +320,24 @@ impl Controle {
         }
         info!("[dabble] {m:?}");
         let appuis = m.boutons & !self.avant.boutons;
+        let relaches = self.avant.boutons & !m.boutons;
         self.avant = m;
-
-        if appuis & bouton::START != 0 {
-            self.changer_banque(categorie_suivante(self.banque));
-            CLIGNOTER.signal((numero_categorie(self.banque), 0));
-        }
-        if appuis & bouton::SELECT != 0 {
-            self.changer_banque(banque_suivante(self.banque));
-            CLIGNOTER.signal((0, position(self.banque)));
-        }
+        self.naviguer(appuis, relaches);
 
         let mut maintenue = None;
         let boutons = [bouton::TRIANGLE, bouton::ROND, bouton::CROIX, bouton::CARRE];
-        for (bit, action) in boutons.into_iter().zip(BANQUES[self.banque].boutons) {
+        for (i, (bit, action)) in boutons
+            .into_iter()
+            .zip(BANQUES[self.banque].boutons)
+            .enumerate()
+        {
             let Some(action) = action else { continue };
+            if appuis & bit != 0 {
+                ECRAN.signal(Vue::Banque {
+                    banque: self.banque,
+                    actif: Some(i),
+                });
+            }
             if action.maintenir {
                 if m.boutons & bit != 0 {
                     maintenue = Some(action.code);
@@ -307,8 +354,49 @@ impl Controle {
         }
     }
 
+    /// Select et Start agissent au relâchement : appui court = suivant, appui long = précédent.
+    fn naviguer(&mut self, appuis: u8, relaches: u8) {
+        if appuis & bouton::START != 0 {
+            self.appui_start = Some(Instant::now());
+        }
+        if relaches & bouton::START != 0
+            && let Some(debut) = self.appui_start.take()
+        {
+            self.changer_banque(if debut.elapsed() >= APPUI_LONG {
+                categorie_precedente(self.banque)
+            } else {
+                categorie_suivante(self.banque)
+            });
+        }
+        if appuis & bouton::SELECT != 0 {
+            self.appui_select = Some(Instant::now());
+        }
+        if relaches & bouton::SELECT != 0
+            && let Some(debut) = self.appui_select.take()
+        {
+            self.changer_banque(if debut.elapsed() >= APPUI_LONG {
+                banque_precedente(self.banque)
+            } else {
+                banque_suivante(self.banque)
+            });
+        }
+    }
+
     fn changer_banque(&mut self, banque: usize) {
+        // Sans écran : les clignotements longs signalent un changement de catégorie.
+        let categorie = numero_categorie(banque);
+        let longs = if categorie != numero_categorie(self.banque) {
+            categorie
+        } else {
+            0
+        };
+        CLIGNOTER.signal((longs, position(banque)));
+
         self.banque = banque;
+        ECRAN.signal(Vue::Banque {
+            banque,
+            actif: None,
+        });
         info!(
             "Catégorie {} ({}), banque {}",
             numero_categorie(banque),
@@ -388,12 +476,67 @@ async fn emetteur_ir(mut emetteur: rmt::Channel<'static, Async, Tx>) {
         };
         Timer::at(prochaine).await;
         debug!("[ir] émission {code:#08x}");
-        if let Err(e) = emetteur.transmit(&ir::trame(ir::sur_canal(code, CANAL))).await {
+        if let Err(e) = emetteur
+            .transmit(&ir::trame(ir::sur_canal(code, CANAL)))
+            .await
+        {
             warn!("[ir] échec d'émission : {e:?}");
         }
         prochaine = Instant::now() + ECART_TRAMES;
     }
 }
+
+#[allow(
+    clippy::large_stack_frames,
+    reason = "le futur de la tâche (tampon d'image compris) vit dans le stockage statique d'embassy"
+)]
+mod affichage {
+    use super::*;
+
+    #[embassy_executor::task]
+    pub async fn ecran_task(i2c: I2c<'static, Async>) {
+        let mut ecran = Ssd1306Async::new(
+            I2CDisplayInterface::new(i2c),
+            DisplaySize128x64,
+            DisplayRotation::Rotate0,
+        )
+        .into_buffered_graphics_mode();
+        // L'écran peut être branché après le démarrage : on réessaie jusqu'à ce qu'il réponde.
+        let mut signale = false;
+        while let Err(e) = ecran.init().await {
+            if !signale {
+                warn!("[écran] pas de réponse sur l'I2C ({e:?}), nouvel essai toutes les 2 s");
+                signale = true;
+            }
+            Timer::after_secs(2).await;
+        }
+        info!("[écran] prêt");
+
+        let mut vue = Vue::Attente;
+        loop {
+            ecran.clear_buffer();
+            let _ = ecran::dessiner(&mut ecran, vue);
+            if let Err(e) = ecran.flush().await {
+                warn!("[écran] erreur d'affichage : {e:?}");
+            }
+            // La surbrillance de l'action envoyée s'efface au bout de 400 ms.
+            vue = match vue {
+                Vue::Banque {
+                    banque,
+                    actif: Some(_),
+                } => match select(ECRAN.wait(), Timer::after_millis(400)).await {
+                    Either::First(nouvelle) => nouvelle,
+                    Either::Second(()) => Vue::Banque {
+                        banque,
+                        actif: None,
+                    },
+                },
+                _ => ECRAN.wait().await,
+            };
+        }
+    }
+}
+use affichage::ecran_task;
 
 #[embassy_executor::task]
 async fn led_task(mut led: Output<'static>) {

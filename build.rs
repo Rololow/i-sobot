@@ -29,25 +29,39 @@ fn generer_banques() {
             .collect()
     };
 
+    // commande, libellé, maintenir, libellé court pour l'écran
     let commandes = lignes(&lire("commandes.csv"));
-    let maintenues: Vec<&str> = commandes
-        .iter()
-        .filter(|c| c.get(2).map(String::as_str) == Some("oui"))
-        .map(|c| c[0].as_str())
-        .collect();
+    for c in &commandes {
+        assert_eq!(
+            c.len(),
+            4,
+            "manette/commandes.csv : 4 colonnes attendues, lu {c:?}"
+        );
+    }
 
     let mut rs = String::from("pub const BANQUES: &[Banque] = &[\n");
     for banque in lignes(&lire("banques.csv")) {
-        assert_eq!(banque.len(), 5, "manette/banques.csv : 5 colonnes attendues, lu {banque:?}");
+        assert_eq!(
+            banque.len(),
+            5,
+            "manette/banques.csv : 5 colonnes attendues, lu {banque:?}"
+        );
         let boutons: Vec<String> = banque[1..]
             .iter()
-            .map(|nom| match nom.as_str() {
-                "" => "None".to_string(),
-                nom => format!(
-                    "Some(Action {{ code: cmd::{}, maintenir: {} }})",
+            .map(|nom| {
+                if nom.is_empty() {
+                    return "None".to_string();
+                }
+                let c = commandes
+                    .iter()
+                    .find(|c| c[0] == *nom)
+                    .unwrap_or_else(|| panic!("« {nom} » absent de manette/commandes.csv"));
+                format!(
+                    "Some(Action {{ code: cmd::{}, maintenir: {}, ecran: {:?} }})",
                     nom.to_uppercase(),
-                    maintenues.contains(&nom)
-                ),
+                    c[2] == "oui",
+                    c[3]
+                )
             })
             .collect();
         rs += &format!(
